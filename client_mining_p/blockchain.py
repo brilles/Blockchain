@@ -14,7 +14,8 @@ class Blockchain(object):
         self.current_transactions = []
         self.nodes = set()
 
-        self.new_block(previous_hash=1, proof=100)
+        # create the genesis block
+        self.new_block(previous_hash=1, proof=99)
 
     def new_block(self, proof, previous_hash=None):
         """
@@ -199,6 +200,14 @@ def full_chain():
 # Note, when demoing, start with this, then change to the below
 # if __name__ == '__main__':
 #     app.run(host='0.0.0.0', port=5000)
+
+@app.route('/last_proof', methods=['GET'])
+def last_proof():
+    response = {
+        'last_proof': blockchain.last_block.proof
+    }
+    return jsonify(response), 200
+
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
