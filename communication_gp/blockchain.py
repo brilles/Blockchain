@@ -18,6 +18,30 @@ class Blockchain(object):
 
         self.new_block(previous_hash=1, proof=100)
 
+    def create_genesis_block(self):
+        """
+        Create the genesis block and add it to the chain
+
+        The genesis block is the anchor of the chaining. 
+        It must be identical for all nodes, or consenus will fail
+
+        It is normally hard coded.
+        """
+
+        block = {
+            'index': 1,
+            'timestamp': 0,
+            'transactions': self.current_transactions,
+            'proof': proof,
+            'previous_hash': previous_hash or self.hash(self.chain[-1]),
+        }
+
+        # Reset the current list of transactions
+        self.current_transactions = []
+
+        self.chain.append(block)
+        return block
+
     def new_block(self, proof, previous_hash=None):
         """
         Create a new Block in the Blockchain
@@ -175,6 +199,19 @@ class Blockchain(object):
 
         return False
 
+    def broadcast_new_block(self, block):
+        """
+        Alert neighbors in list of nodes that a new block has been mined
+        :param block: <Block> the block that has been mined and added to the chain
+        """
+
+        post_data = {"block": block}
+
+        for node in self.nodes:
+            r = requests.post(f'http://{node}/block/new', json=post_data)
+            if r.status_code != 200:
+                # TODO error handing
+                pass
 
 # Instantiate our Node
 app = Flask(__name__)
