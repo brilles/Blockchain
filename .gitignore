@@ -105,3 +105,5 @@ venv.bak/
 
 # id file for miner
 my_id.txt
+
+.vscode

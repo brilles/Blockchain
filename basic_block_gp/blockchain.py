@@ -12,7 +12,7 @@ class Blockchain(object):
         self.current_transactions = []
         self.nodes = set()
 
-        self.new_block(previous_hash=1, proof=100)
+        self.new_block(previous_hash=1, proof=99)  # Create the genesis block
 
     def new_block(self, proof, previous_hash=None):
         """
@@ -70,7 +70,7 @@ class Blockchain(object):
         block_string = json.dumps(block, sort_keys=True).encode()
         return hashlib.sha256(block_string).hexdigest()
 
-    @property
+    @property  # decorator
     def last_block(self):
         return self.chain[-1]
 
@@ -82,7 +82,11 @@ class Blockchain(object):
         - p is the previous proof, and p' is the new proof
         """
 
-        pass
+        proof = 0
+        while self.valid_proof(last_proof, proof) is False:
+            proof += 1
+
+        return proof
 
     @staticmethod
     def valid_proof(last_proof, proof):
@@ -90,8 +94,10 @@ class Blockchain(object):
         Validates the Proof:  Does hash(last_proof, proof) contain 4
         leading zeroes?
         """
-        # TODO
-        pass
+        guess = f'{last_proof}{proof}'.encode()
+        guess_hash = hashlib.sha256(guess).hexdigest()
+
+        return guess_hash[:6] == "000000"
 
     def valid_chain(self, chain):
         """
@@ -139,13 +145,13 @@ def mine():
     proof = blockchain.proof_of_work(last_proof)
 
     # We must receive a reward for finding the proof.
-    # TODO:
+    blockchain.new_transaction(0, node_identifier, 1)
     # The sender is "0" to signify that this node has mine a new coin
     # The recipient is the current node, it did the mining!
     # The amount is 1 coin as a reward for mining the next block
 
     # Forge the new Block by adding it to the chain
-    # TODO
+    block = blockchain.new_block(proof, blockchain.hash(last_block))
 
     # Send a response with the new block
     response = {
@@ -154,6 +160,7 @@ def mine():
         'transactions': block['transactions'],
         'proof': block['proof'],
         'previous_hash': block['previous_hash'],
+        'proof': proof
     }
     return jsonify(response), 200
 
@@ -179,7 +186,8 @@ def new_transaction():
 @app.route('/chain', methods=['GET'])
 def full_chain():
     response = {
-        # TODO: Return the chain and its current length
+        'currentChain': blockchain.chain,
+        'length': len(blockchain.chain)
     }
     return jsonify(response), 200
 
