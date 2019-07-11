@@ -136,7 +136,7 @@ class Blockchain(object):
         """
         guess = f'{last_proof}{proof}'.encode()
         guess_hash = hashlib.sha256(guess).hexdigest()
-        return guess_hash[:6] == "000000"
+        return guess_hash[:4] == "0000"
 
     def valid_chain(self, chain):
         """
@@ -248,13 +248,15 @@ def mine():
     last_proof = last_block['proof']
 
     values = request.get_json()
-    submitted_proof = values.get('proof', 'id')
+    submitted_proof = values.get('proof')
+    miner_id = values.get('id')
 
     if blockchain.valid_proof(last_proof, submitted_proof):
         # We must receive a reward for finding the proof.
         # The sender is "0" to signify that this node has mine a new coin
+
         blockchain.new_transaction(
-            sender=submitted_proof.id,
+            sender=miner_id,
             recipient=node_identifier,
             amount=1,
         )
