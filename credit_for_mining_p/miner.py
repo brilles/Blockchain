@@ -9,10 +9,12 @@ def load_id():
     if os.path.exists("my_id.txt"):
         f = open("my_id.txt", "r")
         id = f.read()
+        f.close()
     else:
         id = str(uuid4()).replace('-', '')
-        f = open("my_id.txt", "w+")
+        f = open("my_id.txt", "w")
         f.write(id)
+        f.close()
     return id
 
 
@@ -53,14 +55,14 @@ if __name__ == '__main__':
     coins_mined = 0
     # Run forever until interrupted
     while True:
-        id = load_id()
+        miner_id = load_id()
         # Get the last proof from the server
         r = requests.get(url=node + "/last_proof")
         data = r.json()
+        print("data", data)
         new_proof = proof_of_work(data.get('proof'))
 
-        post_data = {"proof": new_proof, "id": id}
-        print("Post data", post_data)
+        post_data = {"proof": new_proof, "miner_id": miner_id}
 
         r = requests.post(url=node + "/mine", json=post_data)
         data = r.json()
