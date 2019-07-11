@@ -2,14 +2,16 @@ import hashlib
 import requests
 from uuid import uuid4
 import sys
+import os.path
 
 
 def load_id():
-    f = open("my_id.txt", "r")
-    id = f.readline()
-    if id == "":
+    if os.path.exists("my_id.txt"):
+        f = open("my_id.txt", "r")
+        id = f.read()
+    else:
         id = str(uuid4()).replace('-', '')
-        f = open("my_id.txt", "a")
+        f = open("my_id.txt", "w+")
         f.write(id)
     return id
 
@@ -62,6 +64,7 @@ if __name__ == '__main__':
 
         r = requests.post(url=node + "/mine", json=post_data)
         data = r.json()
+        print("DATA", data)
         if data.get('message') == 'New Block Forged':
             coins_mined += 1
             print("Total coins mined: " + str(coins_mined))
